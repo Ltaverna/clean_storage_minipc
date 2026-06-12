@@ -115,7 +115,20 @@ sudo blkid /dev/nvme0n1p8
 
 ---
 
-## Phase 3 — Move Docker onto the new partition (Linux)
+## Phase 3 & 4 — DONE (2026-06-12)
+
+Docker moved to `/dev/nvme0n1p8` (mounted at `/var/lib/docker` via fstab `UUID=8bbf7d46… nofail`). All 15 containers across the 3 stacks running; crypto-bot Postgres healthy with data intact (orders=105, launch_events=191617). **Root partition dropped 80% → 60% (67G → 50G used, +17G free).**
+
+- The rsync moved **17 GB** (real on-disk size), not the 44 GB that `du` reported while containers were running — the running figure double-counted overlay2 *merged* mounts. Copy verified byte-identical (`rsync --dry-run` clean, file counts matched, Postgres volume present).
+- **Two post-restart hiccups, both fixed (neither caused by the move):**
+  1. **redis** crash-looped on a corrupt `appendonly.aof.2.incr.aof` — fallout from the original disk-full crash (partial AOF write at 0 bytes free). Fixed with `redis-check-aof --fix` (truncated 1.17 MB tail of non-authoritative scheduler data).
+  2. **voice cloudflared** crash-looped: `open /etc/cloudflared/voice-agent.docker.yml: no such file`. Cause: its compose mount is `${HOME}/.cloudflared` and bringing the stack up with **`sudo`** resolved `${HOME}=/root` (empty), not `/home/ltaverna`. Fixed by recreating with `sudo env HOME=/home/ltaverna docker compose up -d --force-recreate cloudflared`.
+
+> ⚠️ **Operational gotcha for next time:** the `voice_conversational_agent` stack uses a `${HOME}/.cloudflared` bind mount. Always bring it up with `HOME=/home/ltaverna` (run as the user, or `sudo env HOME=/home/ltaverna docker compose …`). A plain `sudo docker compose up` points cloudflared at `/root/.cloudflared` and the tunnel fails.
+
+---
+
+## Phase 3 — Move Docker onto the new partition (Linux) — runbook
 
 ```bash
 # 1. Stop Docker (stops ALL containers across all stacks)
