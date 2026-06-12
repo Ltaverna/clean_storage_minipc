@@ -1,0 +1,4 @@
+# local backup artifacts — never push to GitHub
+*.dump
+*.sfdisk
+*.bak

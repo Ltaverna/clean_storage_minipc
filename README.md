@@ -60,9 +60,12 @@ sudo docker compose -f /opt/crypto-bot/docker-compose.yml exec -T postgres \
 lsblk -o NAME,SIZE,FSTYPE,LABEL,MOUNTPOINT,UUID | tee ~/clean_storage_minipc/state_before.txt
 sudo parted /dev/nvme0n1 unit GB print free | tee -a ~/clean_storage_minipc/state_before.txt
 
-# Back up the GPT partition table (restore with: sgdisk --load-backup=FILE /dev/nvme0n1)
-sudo sgdisk --backup=/home/ltaverna/clean_storage_minipc/nvme0n1-gpt.bak /dev/nvme0n1
+# Back up the partition table. sgdisk preferred; this machine has only sfdisk:
+sudo sfdisk -d /dev/nvme0n1 > /home/ltaverna/clean_storage_minipc/nvme0n1-gpt.sfdisk
+# (restore with: sudo sfdisk /dev/nvme0n1 < nvme0n1-gpt.sfdisk)
 ```
+
+> **Phase 0 status: DONE (2026-06-11).** `nvme0n1-gpt.sfdisk` (partition table), `state_before.txt` (lsblk + parted), and `cryptobot_predisk_20260611.dump` (196 MB, 34 tables, custom format, validated with `pg_restore --list`) are saved in this directory. The `.dump`/`.sfdisk` are gitignored — they stay local, not on GitHub.
 
 ---
 
@@ -168,7 +171,7 @@ sudo mv /var/lib/docker.old /var/lib/docker
 sudo systemctl start docker
 ```
 Docker is back exactly as before. The new partition can be left empty or deleted later.
-GPT can be restored from the backup: `sudo sgdisk --load-backup=/home/ltaverna/clean_storage_minipc/nvme0n1-gpt.bak /dev/nvme0n1`.
+The partition table can be restored from the backup: `sudo sfdisk /dev/nvme0n1 < /home/ltaverna/clean_storage_minipc/nvme0n1-gpt.sfdisk`.
 
 ---
 

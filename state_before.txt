@@ -1,0 +1,30 @@
+NAME                                  SIZE FSTYPE    LABEL                           MOUNTPOINT                  UUID
+sda                                     0B                                                                       
+sdb                                     0B                                                                       
+nvme0n1                             476,9G                                                                       
+├─nvme0n1p1                           100M vfat      SYSTEM                                                      B872-A5BB
+├─nvme0n1p2                            16M                                                                       
+├─nvme0n1p3                         378,2G BitLocker MINIPC-LUCAS Windows 11/21/2023                             566c8d82-fb1f-4861-9d12-a2e4e6a7dec6
+│ └─MINIPC-LUCAS_Windows_11_21_2023 378,2G ntfs      Windows                         /run/media/ltaverna/Windows 026A72FA6A72E9B5
+├─nvme0n1p4                           500M vfat                                      /boot                       11B4-EAB4
+├─nvme0n1p5                             1G ntfs      Recovery                                                    7C507358507317DA
+├─nvme0n1p6                            90G ext4                                      /                           2847e587-2f04-4a40-bc1f-48a05a436ac1
+└─nvme0n1p7                           7,2G swap                                      [SWAP]                      0fc3ab6d-97ef-455e-bef9-9a40aa53b80d
+
+Modelo: KINGSTON OM8PGP4512Q-A0 (nvme)
+Disco /dev/nvme0n1: 512GB
+Tamaño de sector (lógico/físico): 512B/512B
+Tabla de particiones: gpt
+Banderas de disco: 
+
+Número  Inicio  Fin     Tamaño  Sistema de ficheros  Nombre                        Banderas
+        0,00GB  0,00GB  0,00GB  Espacio Libre
+ 1      0,00GB  0,11GB  0,10GB  fat32                EFI system partition          arranque, esp
+ 2      0,11GB  0,12GB  0,02GB                       Microsoft reserved partition  msftres
+ 3      0,12GB  406GB   406GB                        Basic data partition          msftdata
+ 4      406GB   407GB   0,52GB  fat32                                              arranque, esp
+ 6      407GB   503GB   96,6GB  ext4
+ 7      503GB   511GB   7,70GB  linux-swap(v1)                                     swap
+ 5      511GB   512GB   1,07GB  ntfs                 Basic data partition          oculta, diag, no_automount
+        512GB   512GB   0,00GB  Espacio Libre
+
