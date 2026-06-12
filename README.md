@@ -84,6 +84,15 @@ sudo sfdisk -d /dev/nvme0n1 > /home/ltaverna/clean_storage_minipc/nvme0n1-gpt.sf
 
 ## Phase 2 — Create + format the new partition (Linux)
 
+> **Phase 2 status: DONE (2026-06-12).** Windows shrunk by ~89 GiB → 94 GB gap appeared at 312GB→406GB (sectors `609798144s`–`793317375s`, between p3 and /boot). Created **`/dev/nvme0n1p8`** (94 GB, label `docker-data`), formatted ext4. **UUID = `8bbf7d46-0103-4f01-befc-a508e078ffc5`**. Neighbours (p3 Windows, p4 /boot, p6 root) untouched.
+>
+> Exact commands used:
+> ```bash
+> sudo parted -a optimal /dev/nvme0n1 mkpart docker-data ext4 609798144s 793317375s
+> sudo partprobe /dev/nvme0n1
+> sudo mkfs.ext4 -L docker-data /dev/nvme0n1p8
+> ```
+
 ```bash
 # 1. Confirm the new free gap appeared (look for a ~100 GB "Free Space" between p3 and p4)
 sudo parted /dev/nvme0n1 unit GB print free
@@ -98,10 +107,10 @@ sudo partprobe /dev/nvme0n1
 lsblk -o NAME,SIZE,FSTYPE /dev/nvme0n1     # note the new partition name, e.g. nvme0n1p8
 
 # 4. Format ext4 with a label (replace pX with the new partition, e.g. p8)
-sudo mkfs.ext4 -L docker-data /dev/nvme0n1pX
+sudo mkfs.ext4 -L docker-data /dev/nvme0n1p8
 
 # 5. Record its UUID — needed for fstab
-sudo blkid /dev/nvme0n1pX
+sudo blkid /dev/nvme0n1p8
 ```
 
 ---
@@ -114,7 +123,7 @@ sudo systemctl stop docker docker.socket
 
 # 2. Mount the new partition at a staging path
 sudo mkdir -p /mnt/docker-data
-sudo mount /dev/nvme0n1pX /mnt/docker-data
+sudo mount /dev/nvme0n1p8 /mnt/docker-data
 
 # 3. Copy Docker's data, preserving overlay2 hardlinks/xattrs/sparse files
 sudo rsync -aHAXS --numeric-ids --info=progress2 /var/lib/docker/ /mnt/docker-data/
@@ -128,7 +137,7 @@ sudo mv /var/lib/docker /var/lib/docker.old
 sudo mkdir /var/lib/docker
 
 # 6. Persist the mount. Append to /etc/fstab (use the UUID from Phase 2 step 5):
-echo 'UUID=<NEW_UUID>  /var/lib/docker  ext4  defaults,nofail  0  2' | sudo tee -a /etc/fstab
+echo 'UUID=8bbf7d46-0103-4f01-befc-a508e078ffc5  /var/lib/docker  ext4  defaults,nofail  0  2' | sudo tee -a /etc/fstab
 
 # 7. Mount it and start Docker
 sudo mount /var/lib/docker
